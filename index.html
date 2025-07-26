@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Future Age → Bitcoin Epoch</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    label { display: block; margin-top: 1.5em; }
+    input[type="range"] { width: 100%; }
+    table { border-collapse: collapse; margin-top: 1em; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 0.5em; }
+    th { text-align: left; background: #f9f9f9; width: 40%; }
+  </style>
+</head>
+<body>
+  <h1>Bitcoin Epoch at Your Future Age</h1>
+
+  <label>
+    Enter your <strong>current age</strong>:
+    <input type="number" id="current-age" min="0" max="150" placeholder="e.g. 30" />
+  </label>
+
+  <label>
+    Slide to your <strong>future age</strong>:
+    <input type="range" id="future-age" min="0" max="150" disabled />
+    <span id="future-age-display">—</span> years old
+  </label>
+
+  <div id="epoch-info"></div>
+
+  <script>
+    // 1) Load your CSV data at runtime and parse it into epochData[]
+    fetch('Sheet.csv')
+      .then(r => r.text())
+      .then(csv => {
+        const lines = csv.trim().split('\n');
+        const headers = lines.shift().split(',').map(h=>h.replace(/"/g,'').trim());
+        window.epochData = lines.map(line => {
+          // split on commas not inside quotes
+          const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+          const obj = {};
+          headers.forEach((h,i) => {
+            let v = (cols[i]||'').replace(/^"|"$/g,'').trim();
+            obj[h] = v;
+          });
+          return obj;
+        });
+      })
+      .catch(err => console.error('Could not load CSV:', err));
+
+    // 2) Wire up controls
+    const ageInput = document.getElementById('current-age');
+    const slider   = document.getElementById('future-age');
+    const display  = document.getElementById('future-age-display');
+    const infoDiv  = document.getElementById('epoch-info');
+
+    ageInput.addEventListener('input', () => {
+      const cur = parseInt(ageInput.value, 10);
+      if (!isNaN(cur) && cur >= 0 && cur <= 150) {
+        slider.disabled = false;
+        slider.min = cur;
+        slider.value = cur;
+        update();
+      } else {
+        slider.disabled = true;
+        display.textContent = '—';
+        infoDiv.innerHTML = '';
+      }
+    });
+
+    slider.addEventListener('input', update);
+
+    function update() {
+      const curAge   = parseInt(ageInput.value, 10);
+      const futAge   = parseInt(slider.value, 10);
+      display.textContent = futAge;
+
+      const birthYear  = new Date().getFullYear() - curAge;
+      const targetYear = birthYear + futAge;
+
+      // wait until epochData is loaded
+      if (!window.epochData) return;
+
+      // find the last epoch whose Year ≤ targetYear
+      const recs = window.epochData.filter(e => +e.Year <= targetYear);
+      const entry = recs.length ? recs[recs.length - 1] : window.epochData[0];
+
+      renderTable(entry);
+    }
