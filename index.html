@@ -103,20 +103,20 @@
       }
 
       // pick the latest epoch whose Year ≤ targetYear
-      const recs = epochData.filter(e => +e.Year <= targetYear);
+      const recs = epochData.filter(e => +e.연도 <= targetYear);
       const entry = recs.length
         ? recs[recs.length - 1]
         : epochData[0];
 
       renderTable(entry, targetYear);
-      DEBUG(`Showing epoch for Year=${entry.Year}`);
+      DEBUG(`Showing epoch for Year=${entry.연도}`);
     }
 
     function renderTable(entry, targetYear) {
       let html = '<table>';
       for (const key in entry) {
         let value = entry[key];
-        if (key === 'Year') {
+        if (key === '연도') {
           value = targetYear; // override with actual year
         }
         html += `<tr><th>${key}</th><td>${entry[key]}</td></tr>`;
