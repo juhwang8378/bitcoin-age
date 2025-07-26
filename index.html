@@ -214,7 +214,7 @@
         percentageDiv.innerHTML = '';
         return;
       }
-      const fields = ['채굴보상(btc)', '총발행량', '비채굴량(총)', '비채굴량(반감기)', '일일공급량'];
+      const fields = ['채굴보상(btc)', '총채굴량', '비채굴량(총)', '비채굴량(반감기)', '일일채굴량'];
       let html = '<h2>BTC수량 퍼센티지</h2><table>';
       fields.forEach(f => {
         const raw = parseFloat((entry[f] || '').replace(/,/g, '')) || 0;
