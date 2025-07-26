@@ -119,7 +119,7 @@
         if (key === '연도') {
           value = targetYear; // override with actual year
         }
-        html += `<tr><th>${key}</th><td>${entry[key]}</td></tr>`;
+        html += `<tr><th>${key}</th><td>${value}</td></tr>`;
       }
       html += '</table>';
       infoDiv.innerHTML = html;
