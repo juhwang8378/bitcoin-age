@@ -13,6 +13,13 @@
     th, td { border: 1px solid #ccc; padding: 0.5em; }
     th { text-align: left; background: #f9f9f9; width: 40%; }
     #debug { color: #999; font-size: 0.8em; margin-top: 1em; }
+    .tooltip-icon {
+      margin-left: 0.3em;
+      cursor: help;
+      font-size: 0.9em;
+      color: #666;
+      border-bottom: 1px dotted #666;
+    }
   </style>
 </head>
 <body>
@@ -120,9 +127,31 @@
 
     function renderTable(entry) {
       let html = '<table>';
+      const hints = {
+        '반감기 시작 연도': '반감기가 시작한 연도',
+        '반감기': '몇번째 반감기',
+        '블록높이': '반감기가 시작된 블록높이',
+        '채굴보상(btc)': '약 4년 반감기 동안의 채굴보상',
+        '채굴보상(sats)': '약 4년 반감기 동안의 채굴보상',
+        '총발행량': '반감기가 시작했을 시점의 총발행량',
+        '총발행량(%)': '반감기가 시작했을 시점의 총발행량',
+        '비채굴량(총)': '반감기가 시작했을 시점의 아직 채굴되지 않은 BTC',
+        '비채굴량(반감기)':'약 4년 반감기 동안 채굴될 수 있는 BTC ',        
+        '일일공급량': 'askjdf',
+        // …etc for each heading you want a message for
+      };      
+      
       for (const key in entry) {
         let value = entry[key];
-        html += `<tr><th>${key}</th><td>${value}</td></tr>`;
+
+        const hintText = hints[key];
+        const icon = hintText
+          ? `<span class="tooltip-icon" title="${hintText}">?</span>`
+          : '';
+          html += `<tr>
+            <th>${key}${icon}</th>
+            <td>${value}</td>
+          </tr>`;
       }
       html += '</table>';
       infoDiv.innerHTML = html;
