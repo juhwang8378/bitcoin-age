@@ -110,12 +110,12 @@
       if (!dataLoaded) return DEBUG('Waiting for CSV…');
 
       // pick latest epoch whose 연도 ≤ targetYear
-      const recs = epochData.filter(e => +e['연도'] <= targetYear);
+      const recs = epochData.filter(e => +e['반감기 시작 연도'] <= targetYear);
       const entry = recs.length ? recs[recs.length - 1] : epochData[0];
 
       renderTable(entry);
       renderPercentTable(entry);
-      DEBUG(`Rendered epoch ${entry['반감기']} at 연도=${targetYear}`);
+      DEBUG(`Rendered epoch ${entry['반감기 시작 연도']} at 연도=${targetYear}`);
     }
 
     function renderTable(entry) {
@@ -134,7 +134,7 @@
         percentageDiv.innerHTML = '';
         return;
       }
-      const fields = ['채굴보상(btc)', '총발행량', '총비채굴량', '비채굴량(반감기)', '일일공급량'];
+      const fields = ['채굴보상(btc)', '총발행량', '비채굴량(총)', '비채굴량(반감기)', '일일공급량'];
       let html = '<h2>BTC수량 퍼센티지</h2><table>';
       fields.forEach(f => {
         const raw = parseFloat((entry[f] || '').replace(/,/g, '')) || 0;
