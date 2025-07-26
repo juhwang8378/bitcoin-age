@@ -28,13 +28,12 @@
     <input type="range" id="future-age" min="0" max="150" disabled />
     <span id="future-age-display">—</span> 살
   </label>
-  
-  <label>
-    Enter your <strong>BTC amount</strong>:
-    <input type="number" id="btc-amount" min="0" step="any" placeholder="e.g. 0.5" disabled />
-  </label>
 
   <div id="epoch-info"></div>
+  <label>
+    <strong>가정하는</strong> BTC 수량을 입력해주세요:
+    <input type="number" id="btc-amount" min="0" step="any" placeholder="e.g. 0.5" disabled />
+  </label>
   <div id="percentage-info"></div>
   <div id="debug"></div>
 
@@ -137,7 +136,7 @@
         return;
       }
       const fields = ['채굴보상(btc)', '총발행량', '총비채굴량', '비채굴량(반감기)', '일일공급량'];
-      let html = '<h2>Percentage of Epoch Metrics</h2><table>';
+      let html = '<h2>BTC수량/메트릭</h2><table>';
       fields.forEach(f => {
         const raw = parseFloat((entry[f] || '').replace(/,/g, '')) || 0;
         const pct = raw > 0 ? ((btcAmt / raw) * 100).toFixed(2) : 'N/A';
