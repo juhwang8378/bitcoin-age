@@ -108,13 +108,17 @@
         ? recs[recs.length - 1]
         : epochData[0];
 
-      renderTable(entry);
+      renderTable(entry, targetYear);
       DEBUG(`Showing epoch for Year=${entry.Year}`);
     }
 
-    function renderTable(entry) {
+    function renderTable(entry, targetYear) {
       let html = '<table>';
       for (const key in entry) {
+        let value = entry[key];
+        if (key === 'Year') {
+          value = targetYear; // override with actual year
+        }
         html += `<tr><th>${key}</th><td>${entry[key]}</td></tr>`;
       }
       html += '</table>';
