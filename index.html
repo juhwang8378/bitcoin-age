@@ -103,13 +103,13 @@
       }
 
       // pick the latest epoch whose Year ≤ targetYear
-      const recs = epochData.filter(e => +e.'연도' <= targetYear);
+      const recs = epochData.filter(e => +e.['연도'] <= targetYear);
       const entry = recs.length
         ? recs[recs.length - 1]
         : epochData[0];
 
       renderTable(entry, targetYear);
-      DEBUG(`Showing epoch for Year=${entry.'연도'}`);
+      DEBUG(`Showing epoch for Year=${entry.['연도']}`);
     }
 
     function renderTable(entry, targetYear) {
