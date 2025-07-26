@@ -13,13 +13,64 @@
     th, td { border: 1px solid #ccc; padding: 0.5em; }
     th { text-align: left; background: #f9f9f9; width: 40%; }
     #debug { color: #999; font-size: 0.8em; margin-top: 1em; }
+
     .tooltip-icon {
       margin-left: 0.3em;
       cursor: help;
       font-size: 0.9em;
       color: #666;
-      border-bottom: 1px dotted #666;
+      /* Removed border-bottom as it's often not needed for this approach */
+      position: relative; /* Needed for positioning the tooltip text */
+      display: inline-block; /* Ensures it respects margin-left */
     }
+    
+    /* Tooltip text styles */
+    .tooltip-icon::after {
+      content: attr(title); /* Get the text from the title attribute */
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%); /* Center the tooltip */
+      bottom: 125%; /* Position above the icon */
+      background-color: #333; /* Dark background */
+      color: #fff; /* White text */
+      padding: 5px 8px;
+      border-radius: 4px;
+      white-space: nowrap; /* Prevent text from wrapping */
+      z-index: 1; /* Ensure it appears above other content */
+      opacity: 0; /* Start hidden */
+      visibility: hidden; /* Start hidden */
+      transition: opacity 0.3s, visibility 0.3s; /* Smooth transition */
+      pointer-events: none; /* Allows clicks through the tooltip when not active */
+    }
+    
+    /* Arrow for the tooltip */
+    .tooltip-icon::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 115%; /* Position slightly below the text */
+      border-width: 5px;
+      border-style: solid;
+      border-color: #333 transparent transparent transparent; /* Creates a downward-pointing arrow */
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+      pointer-events: none;
+    }
+    
+    /* Show tooltip on hover */
+    .tooltip-icon:hover::after,
+    .tooltip-icon:hover::before {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Hide the default browser tooltip */
+    abbr.tooltip-icon[title] {
+      text-decoration: none; /* Removes the dotted underline from <abbr> */
+    }
+    
   </style>
 </head>
 <body>
