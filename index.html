@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,8 +28,14 @@
     <input type="range" id="future-age" min="0" max="150" disabled />
     <span id="future-age-display">—</span> 살
   </label>
+  
+  <label>
+    Enter your <strong>BTC amount</strong>:
+    <input type="number" id="btc-amount" min="0" step="any" placeholder="e.g. 0.5" disabled />
+  </label>
 
   <div id="epoch-info"></div>
+  <div id="percentage-info"></div>
   <div id="debug"></div>
 
   <script>
@@ -40,7 +47,7 @@
     let epochData = [];
     let dataLoaded = false;
 
-    // 1) Load CSV (no spaces in filename)
+    // 1) Load CSV
     fetch('epochs.csv')
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -49,41 +56,46 @@
       .then(csv => {
         DEBUG('CSV loaded, parsing…');
         const [headerLine, ...lines] = csv.trim().split('\n');
-        const headers = headerLine.split(',').map(h => h.trim().replace(/^"|"$/g,''));
+        const headers = headerLine.split(',').map(h => h.trim().replace(/^"|"$/g, ''));
         epochData = lines.map(line => {
           const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
           const obj = {};
-          headers.forEach((h,i) => obj[h] = (cols[i]||'').replace(/^"|"$/g,'').trim());
+          headers.forEach((h, i) => obj[h] = (cols[i]||'').replace(/^"|"$/g, '').trim());
           return obj;
         });
         dataLoaded = true;
         DEBUG(`Parsed ${epochData.length} epochs`);
-        // If user already entered age, re-run update to show table immediately
         update();
       })
       .catch(err => DEBUG('Error loading CSV: ' + err));
 
     // 2) Wire up controls
-    const ageInput = document.getElementById('current-age');
-    const slider   = document.getElementById('future-age');
-    const display  = document.getElementById('future-age-display');
-    const infoDiv  = document.getElementById('epoch-info');
+    const ageInput       = document.getElementById('current-age');
+    const slider         = document.getElementById('future-age');
+    const display        = document.getElementById('future-age-display');
+    const btcInput       = document.getElementById('btc-amount');
+    const infoDiv        = document.getElementById('epoch-info');
+    const percentageDiv  = document.getElementById('percentage-info');
 
     ageInput.addEventListener('input', () => {
       const cur = parseInt(ageInput.value, 10);
       if (!isNaN(cur) && cur >= 0 && cur <= 150) {
-        slider.disabled = false;
-        slider.min = cur;
-        slider.value = cur;
+        slider.disabled   = false;
+        btcInput.disabled = false;
+        slider.min        = cur;
+        slider.value      = cur;
         update();
       } else {
-        slider.disabled = true;
+        slider.disabled   = true;
+        btcInput.disabled = true;
         display.textContent = '—';
-        infoDiv.innerHTML = '';
+        infoDiv.innerHTML   = '';
+        percentageDiv.innerHTML = '';
       }
     });
 
     slider.addEventListener('input', update);
+    btcInput.addEventListener('input', update);
 
     function update() {
       const curAge = parseInt(ageInput.value, 10);
@@ -96,33 +108,43 @@
       const targetYear  = birthYear + futAge;
 
       DEBUG(`Target year: ${targetYear}`);
+      if (!dataLoaded) return DEBUG('Waiting for CSV…');
 
-      if (!dataLoaded) {
-        DEBUG('Waiting for CSV…');
-        return;
-      }
-
-      // pick the latest epoch whose Year ≤ targetYear
+      // pick latest epoch whose 연도 ≤ targetYear
       const recs = epochData.filter(e => +e['연도'] <= targetYear);
-      const entry = recs.length
-        ? recs[recs.length - 1]
-        : epochData[0];
+      const entry = recs.length ? recs[recs.length - 1] : epochData[0];
 
       renderTable(entry, targetYear);
-      DEBUG(`Showing epoch for Year=${entry['연도']}`);
+      renderPercentTable(entry);
+      DEBUG(`Rendered epoch ${entry['반감기']} at 연도=${targetYear}`);
     }
 
     function renderTable(entry, targetYear) {
       let html = '<table>';
       for (const key in entry) {
         let value = entry[key];
-        if (key === '연도') {
-          value = targetYear; // override with actual year
-        }
+        if (key === '연도') value = targetYear;
         html += `<tr><th>${key}</th><td>${value}</td></tr>`;
       }
       html += '</table>';
       infoDiv.innerHTML = html;
+    }
+
+    function renderPercentTable(entry) {
+      const btcAmt = parseFloat(btcInput.value);
+      if (isNaN(btcAmt)) {
+        percentageDiv.innerHTML = '';
+        return;
+      }
+      const fields = ['채굴보상(btc)', '총발행량', '총비채굴량', '비채굴량(반감기)', '일일공급량'];
+      let html = '<h2>Percentage of Epoch Metrics</h2><table>';
+      fields.forEach(f => {
+        const raw = parseFloat((entry[f] || '').replace(/,/g, '')) || 0;
+        const pct = raw > 0 ? ((btcAmt / raw) * 100).toFixed(2) : 'N/A';
+        html += `<tr><th>${f}</th><td>${pct}%</td></tr>`;
+      });
+      html += '</table>';
+      percentageDiv.innerHTML = html;
     }
   </script>
 </body>
