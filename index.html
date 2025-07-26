@@ -11,6 +11,7 @@
     table { border-collapse: collapse; margin-top: 1em; width: 100%; }
     th, td { border: 1px solid #ccc; padding: 0.5em; }
     th { text-align: left; background: #f9f9f9; width: 40%; }
+    #debug { color: #999; font-size: 0.8em; margin-top: 1em; }
   </style>
 </head>
 <body>
@@ -28,26 +29,39 @@
   </label>
 
   <div id="epoch-info"></div>
+  <div id="debug"></div>
 
   <script>
-    // 1) Load your CSV data at runtime and parse it into epochData[]
-    fetch('Sheets.csv')
-      .then(r => r.text())
+    const DEBUG = msg => {
+      console.log(msg);
+      document.getElementById('debug').textContent = msg;
+    };
+
+    let epochData = [];
+    let dataLoaded = false;
+
+    // 1) Load CSV (no spaces in filename)
+    fetch('epochs.csv')
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.text();
+      })
       .then(csv => {
-        const lines = csv.trim().split('\n');
-        const headers = lines.shift().split(',').map(h=>h.replace(/"/g,'').trim());
-        window.epochData = lines.map(line => {
-          // split on commas not inside quotes
-          const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+        DEBUG('CSV loaded, parsing…');
+        const [headerLine, ...lines] = csv.trim().split('\n');
+        const headers = headerLine.split(',').map(h => h.trim().replace(/^"|"$/g,''));
+        epochData = lines.map(line => {
+          const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
           const obj = {};
-          headers.forEach((h,i) => {
-            let v = (cols[i]||'').replace(/^"|"$/g,'').trim();
-            obj[h] = v;
-          });
+          headers.forEach((h,i) => obj[h] = (cols[i]||'').replace(/^"|"$/g,'').trim());
           return obj;
         });
+        dataLoaded = true;
+        DEBUG(`Parsed ${epochData.length} epochs`);
+        // If user already entered age, re-run update to show table immediately
+        update();
       })
-      .catch(err => console.error('Could not load CSV:', err));
+      .catch(err => DEBUG('Error loading CSV: ' + err));
 
     // 2) Wire up controls
     const ageInput = document.getElementById('current-age');
@@ -72,21 +86,39 @@
     slider.addEventListener('input', update);
 
     function update() {
-      const curAge   = parseInt(ageInput.value, 10);
-      const futAge   = parseInt(slider.value, 10);
+      const curAge = parseInt(ageInput.value, 10);
+      const futAge = parseInt(slider.value, 10);
+      if (isNaN(curAge) || isNaN(futAge)) return;
+
       display.textContent = futAge;
+      const currentYear = new Date().getFullYear();
+      const birthYear   = currentYear - curAge;
+      const targetYear  = birthYear + futAge;
 
-      const birthYear  = new Date().getFullYear() - curAge;
-      const targetYear = birthYear + futAge;
+      DEBUG(`Target year: ${targetYear}`);
 
-      // wait until epochData is loaded
-      if (!window.epochData) return;
+      if (!dataLoaded) {
+        DEBUG('Waiting for CSV…');
+        return;
+      }
 
-      // find the last epoch whose Year ≤ targetYear
-      const recs = window.epochData.filter(e => +e.Year <= targetYear);
-      const entry = recs.length ? recs[recs.length - 1] : window.epochData[0];
+      // pick the latest epoch whose Year ≤ targetYear
+      const recs = epochData.filter(e => +e.Year <= targetYear);
+      const entry = recs.length
+        ? recs[recs.length - 1]
+        : epochData[0];
 
       renderTable(entry);
+      DEBUG(`Showing epoch for Year=${entry.Year}`);
+    }
+
+    function renderTable(entry) {
+      let html = '<table>';
+      for (const key in entry) {
+        html += `<tr><th>${key}</th><td>${entry[key]}</td></tr>`;
+      }
+      html += '</table>';
+      infoDiv.innerHTML = html;
     }
   </script>
 </body>
