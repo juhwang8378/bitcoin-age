@@ -215,7 +215,7 @@
         return;
       }
       const fields = ['채굴보상(btc)', '총채굴량', '미채굴량(총)', '미채굴량(반감기)', '일일채굴량'];
-      let html = '<h2>BTC수량 퍼센티지</h2><table>';
+      let html = '<h2>BTC수량 대비 비율</h2><table>';
       fields.forEach(f => {
         const raw = parseFloat((entry[f] || '').replace(/,/g, '')) || 0;
         const pct = raw > 0 ? ((btcAmt / raw) * 100).toFixed(2) : 'N/A';
