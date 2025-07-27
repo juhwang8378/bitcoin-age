@@ -196,28 +196,28 @@
       DEBUG(`Target year: ${targetYear}`);
       if (!dataLoaded) return DEBUG('Waiting for CSV…');
 
-      // pick latest epoch whose 연도 ≤ targetYear
-      const recs = epochData.filter(e => +e['반감기 시작 연도'] <= targetYear);
+      // pick latest epoch whose 년도 ≤ targetYear
+      const recs = epochData.filter(e => +e['반감기 시작 년도'] <= targetYear);
       const entry = recs.length ? recs[recs.length - 1] : epochData[0];
 
       renderTable(entry);
       renderPercentTable(entry);
-      DEBUG(`Rendered epoch ${entry['반감기 시작 연도']} at 연도=${targetYear}`);
+      DEBUG(`Rendered epoch ${entry['반감기 시작 년도']} at 년도=${targetYear}`);
     }
 
     function renderTable(entry) {
       let html = '<table>';
       const hints = {
-        '반감기 시작 연도': '반감기가 시작한 해',
+        '반감기 시작 년도': '반감기가 시작한 해',
         '반감기': '몇번째 반감기',
-        '블록높이': '반감기가 시작된 블록높이',
-        '채굴보상(btc)': '약 4년 반감기 동안의 채굴보상',
-        '채굴보상(sats)': '약 4년 반감기 동안의 채굴보상',
-        '총채굴량': '반감기가 시작했을 시점의 총채굴량',
-        '총채굴량(%)': '반감기가 시작했을 시점의 총채굴량 비율',
-        '미채굴량(총)': '반감기가 시작했을 시점의 아직 채굴되지 않은 BTC',
-        '미채굴량(반감기)':'이번 4년 반감기 동안 채굴 가능한 BTC ',
-        '일일채굴량': '하루에 가능한 최대 채굴량',
+        '블록높이': '다음 반감기까지의 블록높이',
+        '채굴보상(btc)': '다음 반감기까지의 채굴보상',
+        '채굴보상(sats)': '다음 반감기까지의 채굴보상',
+        '총채굴량': '다음 반감기까지의 총채굴량',
+        '총채굴량(%)': '다음 반감기까지의 총채굴량 비율',
+        '미채굴량(총)': '다음 반감기까지의 미채굴 BTC',
+        '미채굴량(반감기)':'다음 반감기까지 채굴 가능한 BTC ',
+        '일일채굴량': '다음 반감기까지 가능한 하루 최대 채굴량',
         // …etc for each heading you want a message for
       };      
       
