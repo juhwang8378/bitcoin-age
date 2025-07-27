@@ -114,6 +114,7 @@
   </label>
 
   <div id="epoch-info"></div>
+  <h2>내 BTC는 미래 채굴현황에 비해 어느정도 힘을 가지고 있을까?</h2>
   <label>
     <strong>가정하는</strong> BTC 수량을 입력해주세요:
     <input type="number" id="btc-amount" min="0" step="any" placeholder="e.g. 0.5" disabled />
@@ -296,7 +297,7 @@
         return;
       }
       const fields = ['채굴보상(btc)', '총채굴량', '미채굴량(총)', '미채굴량(반감기)', '일일채굴량'];
-      let html = '<h2>내 BTC는 미래 채굴현황에 비해 어느정도 힘을 가지고 있을까?</h2><table>';
+      let html = '<table>';
       fields.forEach(f => {
         const raw = parseFloat((entry[f] || '').replace(/,/g, '')) || 0;
         const pct = raw > 0 ? ((btcAmt / raw) * 100).toFixed(2) : 'N/A';
