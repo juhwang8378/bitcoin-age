@@ -224,7 +224,23 @@
       for (const key in entry) {
         let value = entry[key];
         const hintText = hints[key];
-        
+   
+        if (key === '블록높이'){
+          value = '> ' + value;
+        }
+        if (key === '총채굴량'){
+          value = '> ' + value;
+        }            
+        if (key === '총채굴량(%)'){
+          value = '> ' + value;
+        }
+        if (key === '미채굴량(총)'){
+          value = '< ' + value;
+        }        
+        if (key === '미채굴량(반감기)'){
+          value = '< ' + value;
+        }
+
         const icon = hintText
           ? `<span class="tooltip-trigger">?
               <div class="tooltip-content">${hintText}</div>
