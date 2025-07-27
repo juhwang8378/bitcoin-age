@@ -63,7 +63,6 @@
       opacity: 1;
       visibility: visible;
     }
-    
   </style>
 </head>
 <body>
@@ -86,6 +85,7 @@
     <input type="number" id="btc-amount" min="0" step="any" placeholder="e.g. 0.5" disabled />
   </label>
   <div id="percentage-info"></div>
+  <div id="explanation"></div>
   <div id="debug"></div>
 
   <script>
@@ -126,6 +126,8 @@
     const btcInput       = document.getElementById('btc-amount');
     const infoDiv        = document.getElementById('epoch-info');
     const percentageDiv  = document.getElementById('percentage-info');
+    const tooltipTriggers = infoDiv.querySelectorAll('.tooltip-trigger');
+    let activeTooltip = null; // To keep track of the currently open tooltip
 
     ageInput.addEventListener('input', () => {
       const cur = parseInt(ageInput.value, 10);
@@ -187,10 +189,12 @@
       
       for (const key in entry) {
         let value = entry[key];
-
         const hintText = hints[key];
+        
         const icon = hintText
-          ? `<span class="tooltip-trigger" data-hint-text="${hintText}">?</span>`
+          ? `<span class="tooltip-trigger">?
+              <div class="tooltip-content">${hintText}"</div>
+              </span>`
           : '';
           html += `<tr>
             <th>${key}${icon}</th>
@@ -199,32 +203,25 @@
       }
       html += '</table>';
       infoDiv.innerHTML = html;
+      setupTooltips();
     }
 
-    const tooltipTriggers = infoDiv.querySelectorAll('.tooltip-trigger');
-    let activeTooltip = null; // To keep track of the currently open tooltip
+    function setupTooltips() {
+      const tooltipTriggers = infoDiv.querySelectorAll('.tooltip-trigger');
 
-    tooltipTriggers.forEach(trigger => {
-      const tooltipContent = document.createElement('div');
-      tooltipContent.classList.add('tooltip-content');
-      tooltipContent.textContent = trigger.dataset.hintText; //Get text from data attribute
-      trigger.appendChild(tooltipContent); // Append content to the trigger span
-
-      trigger.addEventListener('click', function(event) {
-        event.stopPropagation(); // Prevent this click from immediately closing the tooltip if it's the same one
-
-        // If there's an active tooltip and it's not the one we just clicked, close it
-        if (activeTooltip && activeTooltip !== this) {
-          activeTooltip.classList.remove('active');
-        }
-
-        //Toggle the 'active' class on the clicked trigger
-        this.classList.toggle('active');
-
-        // Update the activeTooltip reference
-        activeTooltip = this.classList.contains('active') ? this : null;
+      tooltipTriggers.forEach(trigger => {
+          trigger.addEventListener('click', function(event) {
+              event.stopPropagation();
+  
+              if (activeTooltip && activeTooltip !== this) {
+                  activeTooltip.classList.remove('active');
+              }
+  
+              this.classList.toggle('active');
+              activeTooltip = this.classList.contains('active') ? this : null;
+          });
       });
-    });
+    }
 
     document.addEventListener('click', function(event) {
       // If there's an active tooltip and the click was outside of it
@@ -249,7 +246,7 @@
         return;
       }
       const fields = ['채굴보상(btc)', '총채굴량', '미채굴량(총)', '미채굴량(반감기)', '일일채굴량'];
-      let html = '<h2>BTC수량 대비 비율</h2><table>';
+      let html = '<h2>내 BTC는 미래에 채굴현황에 비해 어느정도 힘을 가지고 있을까?</h2><table>';
       fields.forEach(f => {
         const raw = parseFloat((entry[f] || '').replace(/,/g, '')) || 0;
         const pct = raw > 0 ? ((btcAmt / raw) * 100).toFixed(2) : 'N/A';
