@@ -13,6 +13,10 @@
     th, td { border: 1px solid #ccc; padding: 0.5em; }
     th { text-align: left; background: #f9f9f9; width: 40%; }
     #debug { color: #999; font-size: 0.8em; margin-top: 1em; }
+
+    #current-age {
+      width: 115px;
+    }
     
     /* Style for the slider track */
     input[type="range"]::-webkit-slider-runnable-track {
@@ -116,7 +120,7 @@
   <div id="epoch-info"></div>
   <h2>내 BTC는 미래 채굴현황에 비해 어느정도 힘을 가지고 있을까?</h2>
   <label>
-    상단에서 나이를 입력하신 후에 BTC 수량을 입력해주세요:
+    나이를 먼저 입력하신 후에 BTC 수량을 입력해주세요:
     <input type="number" id="btc-amount" min="0" step="any" placeholder="e.g. 0.5" disabled />
   </label>
   <div id="percentage-info"></div>
