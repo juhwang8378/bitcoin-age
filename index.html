@@ -14,19 +14,17 @@
     th { text-align: left; background: #f9f9f9; width: 40%; }
     #debug { color: #999; font-size: 0.8em; margin-top: 1em; }
 
-    .tooltip-icon {
+    .tooltip-trigger {
       margin-left: 0.3em;
-      cursor: help;
+      cursor: pointer; /* Use pointer cursor for clickable elements */
       font-size: 0.9em;
       color: #666;
-      /* Removed border-bottom as it's often not needed for this approach */
-      position: relative; /* Needed for positioning the tooltip text */
-      display: inline-block; /* Ensures it respects margin-left */
+      border-bottom: 1px dotted #666; /* Keep dotted border for visual cue */
+      position: relative; /* Needed for positioning the tooltip content */
+      display: inline-block; /* Allows margin-left and correct positioning */
     }
     
-    /* Tooltip text styles */
-    .tooltip-icon::after {
-      content: attr(title); /* Get the text from the title attribute */
+    .tooltip-content {
       position: absolute;
       left: 50%;
       transform: translateX(-50%); /* Center the tooltip */
@@ -36,39 +34,34 @@
       padding: 5px 8px;
       border-radius: 4px;
       white-space: nowrap; /* Prevent text from wrapping */
-      z-index: 1; /* Ensure it appears above other content */
+      z-index: 10; /* Ensure it appears above other content */
       opacity: 0; /* Start hidden */
       visibility: hidden; /* Start hidden */
       transition: opacity 0.3s, visibility 0.3s; /* Smooth transition */
-      pointer-events: none; /* Allows clicks through the tooltip when not active */
+      pointer-events: none; /* Prevents interaction with hidden tooltip */
+    
+      /* Add max-width for long hints to wrap */
+      max-width: 200px; /* Adjust as needed */
+      white-space: normal; /* Allow text to wrap within max-width */
+      text-align: center;
     }
     
     /* Arrow for the tooltip */
-    .tooltip-icon::before {
+    .tooltip-content::after {
       content: '';
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      bottom: 115%; /* Position slightly below the text */
+      top: 100%; /* Position below the content */
       border-width: 5px;
       border-style: solid;
       border-color: #333 transparent transparent transparent; /* Creates a downward-pointing arrow */
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s, visibility 0.3s;
-      pointer-events: none;
     }
     
-    /* Show tooltip on hover */
-    .tooltip-icon:hover::after,
-    .tooltip-icon:hover::before {
+    /* Show tooltip when the parent .tooltip-trigger has the 'active' class */
+    .tooltip-trigger.active .tooltip-content {
       opacity: 1;
       visibility: visible;
-    }
-    
-    /* Hide the default browser tooltip */
-    abbr.tooltip-icon[title] {
-      text-decoration: none; /* Removes the dotted underline from <abbr> */
     }
     
   </style>
@@ -197,7 +190,7 @@
 
         const hintText = hints[key];
         const icon = hintText
-          ? `<abbr class="tooltip-icon" title="${hintText}">?</abbr>`
+          ? `<span class="tooltip-trigger" data-hint-text="${hintText}">?</span>`
           : '';
           html += `<tr>
             <th>${key}${icon}</th>
@@ -208,6 +201,47 @@
       infoDiv.innerHTML = html;
     }
 
+    const tooltipTriggers = infoDiv.querySelectorAll('.tooltip-trigger');
+    let activeTooltip = null; // To keep track of the currently open tooltip
+
+    tooltipTriggers.forEach(trigger => {
+      const tooltipContent = document.createElement('div');
+      tooltipContent.classList.add('tooltip-content');
+      tooltipContent.textContent = trigger.dataset.hintText; //Get text from data attribute
+      trigger.appendChild(tooltipContent); // Append content to the trigger span
+
+      trigger.addEventListener('click', function(event) {
+        event.stopPropagation(); // Prevent this click from immediately closing the tooltip if it's the same one
+
+        // If there's an active tooltip and it's not the one we just clicked, close it
+        if (activeTooltip && activeTooltip !== this) {
+          activeTooltip.classList.remove('active');
+        }
+
+        //Toggle the 'active' class on the clicked trigger
+        this.classList.toggle('active');
+
+        // Update the activeTooltip reference
+        activeTooltip = this.classList.contains('active') ? this : null;
+      });
+    });
+
+    document.addEventListener('click', function(event) {
+      // If there's an active tooltip and the click was outside of it
+      if (activeTooltip && !activeTooltip.contains(event.target)) {
+        activeTooltip.classList.remove('active');
+        activeTooltip = null; // Reset active tooltip
+      }
+    });
+
+    // Optional: Close tooltip on scroll
+    window.addEventListener('scroll', function() {
+      if (activeTooltip) {
+        activeTooltip.classList.remove('active');
+        activeTooltip = null;
+      }
+    });
+    
     function renderPercentTable(entry) {
       const btcAmt = parseFloat(btcInput.value);
       if (isNaN(btcAmt)) {
