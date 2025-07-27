@@ -6,14 +6,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>내 미래 나이에 비트코인은?</title>
   <style>
-    body { font-family: sans-serif; margin: 2em; }
+    body { font-family: sans-serif; margin: 2em; overscroll-behavior-y: contain;}
     label { display: block; margin-top: 1.5em; }
     input[type="range"] { width: 100%; }
     table { border-collapse: collapse; margin-top: 1em; width: 100%; }
     th, td { border: 1px solid #ccc; padding: 0.5em; }
     th { text-align: left; background: #f9f9f9; width: 40%; }
     #debug { color: #999; font-size: 0.8em; margin-top: 1em; }
-
+    
+    /* Style for the slider track */
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px;
+      background: #ddd;
+      border-radius: 2px;
+    }
+    
+    /* Style for the slider thumb (handle) */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; /* Removes default styling */
+      appearance: none;
+      margin-top: -8px; /* Vertically center the thumb on the track */
+      width: 20px; /* Make the thumb wider */
+      height: 20px; /* Make the thumb taller */
+      background: #007bff; /* A distinct color */
+      border-radius: 50%; /* Make it a circle */
+      cursor: pointer;
+    }
+    
+    /* Firefox specific styles */
+    input[type="range"]::-moz-range-track {
+        height: 4px;
+        background: #ddd;
+        border-radius: 2px;
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background: #007bff;
+        border-radius: 50%;
+        cursor: pointer;
+        border: none; /* Remove default border */
+    }
+    
     .tooltip-trigger {
       margin-left: 0.3em;
       cursor: pointer; /* Use pointer cursor for clickable elements */
@@ -41,8 +76,7 @@
       pointer-events: none; /* Prevents interaction with hidden tooltip */
     
       /* Add max-width for long hints to wrap */
-      max-width: 200px; /* Adjust as needed */
-      white-space: normal; /* Allow text to wrap within max-width */
+      word-break: keep-all; /* Prevents awkward breaks in Korean text */
       text-align: center;
     }
     
@@ -182,7 +216,7 @@
         '총채굴량': '반감기가 시작했을 시점의 총채굴량',
         '총채굴량(%)': '반감기가 시작했을 시점의 총채굴량 비율',
         '미채굴량(총)': '반감기가 시작했을 시점의 아직 채굴되지 않은 BTC',
-        '미채굴량(반감기)':'이번 4년 반감기 동안 채굴될 수 있는 BTC ',
+        '미채굴량(반감기)':'이번 4년 반감기 동안 채굴 가능한 BTC ',
         '일일채굴량': '하루에 가능한 최대 채굴량',
         // …etc for each heading you want a message for
       };      
@@ -246,7 +280,7 @@
         return;
       }
       const fields = ['채굴보상(btc)', '총채굴량', '미채굴량(총)', '미채굴량(반감기)', '일일채굴량'];
-      let html = '<h2>내 BTC는 미래에 채굴현황에 비해 어느정도 힘을 가지고 있을까?</h2><table>';
+      let html = '<h2>내 BTC는 미래 채굴현황에 비해 어느정도 힘을 가지고 있을까?</h2><table>';
       fields.forEach(f => {
         const raw = parseFloat((entry[f] || '').replace(/,/g, '')) || 0;
         const pct = raw > 0 ? ((btcAmt / raw) * 100).toFixed(2) : 'N/A';
